@@ -3,7 +3,6 @@
 #include <string>
 #include <chrono>
 
-int colisoes = 0;
 
 //NECESSÁRIO ATUALIZAR VERSÕES DO GCC >=7.x.x
 
@@ -15,7 +14,7 @@ public:node  *prev;
 public:thing A;
 public:node *next;
 
-public :static node* new_node(thing T) {
+public:static node* new_node(thing T) {
 
         node *N = new node();
         N->next=nullptr;
@@ -33,29 +32,32 @@ class linked_list {
     node<thing> *head;
     node <thing> *tail;
     node <thing> *iterator;
+    int colission;
     int size;
 
-public:linked_list() {
 
-        this->head=nullptr;
-        this->tail=nullptr;
-        this->iterator=nullptr;
-        size=0;
+
+public: linked_list() {
+
+    this->head=nullptr;
+    this->tail=nullptr;
+    this->iterator=nullptr;
+    this->size=0;
+    this->colission=0;
 }
 
 public:bool insert_head(thing T) {
 
-        node<thing> *S= node<thing>::new_node(T);
-        if (this->head==nullptr && this->tail==nullptr) {
+    node<thing> *S= node<thing>::new_node(T);
+    if (this->head==nullptr && this->tail==nullptr) {
 
-            this->head = S;
-            this->tail = S;
-            S->next=nullptr;
-            S->prev=nullptr;
-            this->iterator = head;
-
-        }
-        else if (this->head == this->tail) {
+        this->head = S;
+        this->tail = S;
+        S->next=nullptr;
+        S->prev=nullptr;
+        this->iterator = head;
+    }
+    else if (this->head == this->tail) {
 
             this->head->prev = S;
             S->prev=nullptr;
@@ -63,87 +65,85 @@ public:bool insert_head(thing T) {
             this->head = S;
 
 
-        }
-        else {
-
-            this->head->prev = S;
-            S->prev = nullptr;
-            S->next = this->head;
-            this->head=S;
-        }
-
-        this->size+=1;
-
-        if(this->size>1) {
-            colisoes++;
-        }
-
-
-        return true;
     }
+    else{
+        this->head->prev = S;
+        S->prev = nullptr;
+        S->next = this->head;
+        this->head=S;
+    }
+
+    this->size+=1;
+
+    if(this->size>1) {
+        this->colission+=1;
+    }
+
+
+    return true;
+}
 
 
 public:bool delete_iterator() {
 
-        if (this->tail== this->head) {
+    if (this->tail== this->head) {
 
-            this->tail= nullptr;
-            this->tail->next=nullptr;
-            this->tail->prev=nullptr;
-
-
-            this->head=nullptr;
-            this->head->next= nullptr;
-            this->head->prev=nullptr;
-
-            delete iterator;
-            this->iterator = nullptr;
-            this->iterator->next=nullptr;
-            this->iterator->prev=nullptr;
-        }
-        else if (this->iterator==this->tail) {
-
-            this->iterator->prev->next = nullptr;
-            this->tail= iterator->prev;
-            delete iterator;
-            this->iterator=tail;
+        this->tail= nullptr;
+        this->tail->next=nullptr;
+        this->tail->prev=nullptr;
 
 
-        }
-        else if (this->iterator==this->head) {
+        this->head=nullptr;
+        this->head->next= nullptr;
+        this->head->prev=nullptr;
 
-            this->iterator->next->prev= nullptr;
-            this->head = this->iterator->next;
-            delete iterator;
-            this->iterator=head;
+        delete iterator;
+        this->iterator = nullptr;
+        this->iterator->next=nullptr;
+        this->iterator->prev=nullptr;
+    }
+    else if (this->iterator==this->tail) {
 
-        }
-        else {
+        this->iterator->prev->next = nullptr;
+        this->tail= iterator->prev;
+        delete iterator;
+        this->iterator=tail;
 
-            iterator->prev->next= iterator->next;
-            iterator->next->prev= iterator->prev;
-            delete iterator;
-        }
+    }
+    else if (this->iterator==this->head) {
+
+        this->iterator->next->prev= nullptr;
+        this->head = this->iterator->next;
+        delete iterator;
+        this->iterator=head;
+
+    }
+    else {
+
+        iterator->prev->next= iterator->next;
+        iterator->next->prev= iterator->prev;
+        delete iterator;
+    }
 
     this->size-=1;
     return true;
 
-    }
+}
 
 
 public:bool setIteratorHead() {
 
-        this->iterator=this->head;
-        return true;
+    this->iterator=this->head;
+    return true;
 }
 
 public:bool incrementIterator() {
 
-        this->iterator = this->iterator->next;
-        if (this->iterator==nullptr) {
-            return false;
-        }
-        return  true;
+    this->iterator = this->iterator->next;
+    if (this->iterator==nullptr) {
+          return false;
+    }
+    return  true;
 }
 
 public:thing getHeadValue() {
@@ -156,8 +156,51 @@ public:thing getIteratorValue() {
     return this->iterator->A;
 }
 
+public:int getColission() {
+    return  this->colission;
+}
+
+
+public:bool clear() {
+
+    this->iterator=this->head;
+    while(this->iterator) {
+
+        node<thing> *temp = this->iterator;
+        this->iterator = this->iterator->next;
+        delete temp;
+    }
+
+    this->iterator=nullptr;
+    this->head=nullptr;
+    this->tail=nullptr;
+
+    return true;
+}
+
+
+
+    ~linked_list() {
+
+      this->iterator=this->head;
+
+       while(this->iterator) {
+           node<thing> *temp = this->iterator;
+           this->iterator = this->iterator->next;
+           delete temp;
+       }
+
+       this->iterator=nullptr;
+       this->head=nullptr;
+       this->tail=nullptr;
+}
+
+
+
 
 };
+
+
 
 
 template <typename thing>
@@ -167,12 +210,10 @@ public:linked_list<thing> *V;
     int M;
 
     hash_table(int M) {
-
         this->V = new linked_list<thing>[M];
         this->M=M;
-
-
     }
+
 public:bool insert(thing A) {
 
     int pos;
@@ -189,7 +230,6 @@ public:bool insert(thing A) {
     }
     else {
         pos = A%this->M;
-        std::cout<<"NOT STRING";
     }
 
     (V+pos)->insert_head(A);
@@ -221,6 +261,7 @@ public:bool search(thing A) {
     thing aux = (V+pos)->getIteratorValue();
 
     while (A!= aux) {
+
         if ((V+pos)->incrementIterator()) {
             aux = (V+pos)->getIteratorValue();
         }
@@ -229,7 +270,7 @@ public:bool search(thing A) {
         }
     }
 
-        return true;
+    return true;
 }
 
 public:bool remove(thing A) {
@@ -271,6 +312,45 @@ public:bool remove(thing A) {
 
 }
 
+public:bool clear() {
+
+    for(int i = 0 ; i<this->M ; i++) {
+
+        (V+i)->clear();
+    }
+
+    return true;
+}
+
+public:int getColissionPerLine() {
+
+    int T = 0;
+
+    for(int i =0,temp ; i<this->M ; i++) {
+
+        temp = (V+i)->getColission();
+        std::cout<<"V["<<i<<"] = "<<temp<<" colisoes\n";
+        T+=temp;
+    }
+
+    return T;
+}
+
+
+    ~hash_table() {
+
+    for(int i =0 ; i<this->M ; i++) {
+
+        (V+i)->clear();
+    }
+
+    delete []V;
+
+}
+
+
+
+
 };
 
 
@@ -283,12 +363,7 @@ char genCharByASCII() {
 
 std::string genString(int maxSize) {
 
-
-
     int sizeString = rand()%maxSize+1;
-
-
-
     char c;
     std::string newString;
 
@@ -307,7 +382,7 @@ int main() {
 
 
     srand (time(NULL));
-    int N_Strings = 1000000;
+    int N_Strings = 100000;
     int k = rand()%N_Strings;
     double M_Insercao_NS = 0;
     double M_Insercao_MS =0;
@@ -325,9 +400,7 @@ int main() {
      */
 
 
-    hash_table<std::string> H = hash_table<std::string>( 31);
-
-
+    hash_table<std::string> H = hash_table<std::string>(151);
 
 
 
@@ -382,12 +455,14 @@ int main() {
     auto duracao_segundos_remocao = std::chrono::duration_cast<std::chrono::seconds>(fim_remocao-inicio_remocao);
 
     std::cout<<"-----------------------------------\n\n";
-    std::cout<<"Numero de colisoes totais= "<<colisoes<<"\n";
     std::cout<<"MEDIA DE TEMPO DE INSERCAO\n";
     std::cout<<"Nanosegundos ="<<M_Insercao_NS/N_Strings<<"\n";
     std::cout<<"Milissegundos ="<<M_Insercao_MS/N_Strings<<"\n";
     std::cout<<"Segundos ="<<M_Insercao_SEG/N_Strings<<"\n";
-
+    std::cout<<"------------------------------------------\n";
+    std::cout<<"COLISOES POR LINHA DO VETOR DA TABELA HASH\n";
+    int T = H.getColissionPerLine();
+    std::cout<<"COLISOES TOTAIS ="<<T<<"\n";
     std::cout<<"-----------------------------------\n";
     std::cout<<"-----------------------------------\n";
     std::cout<<"-----------------------------------\n";

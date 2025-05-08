@@ -2,9 +2,10 @@
 #include <type_traits>
 #include <string>
 #include <chrono>
-
+#include <fstream>
 
 //NECESSÁRIO ATUALIZAR VERSÕES DO GCC >=7.x.x
+
 
 template <typename thing>
 class node {
@@ -174,6 +175,8 @@ public:bool clear() {
     this->iterator=nullptr;
     this->head=nullptr;
     this->tail=nullptr;
+    this->size=0;
+    this->colission=0;
 
     return true;
 }
@@ -382,12 +385,19 @@ int main() {
 
 
     srand (time(NULL));
-    int N_Strings = 100000;
-    int k = rand()%N_Strings;
-    double M_Insercao_NS = 0;
-    double M_Insercao_MS =0;
-    double M_Insercao_SEG =0;
+    int N_Strings = 100;
+    int k;
+    double T_Insercao_H31 = 0;
+    double T_Insercao_H79 =0;
+    double T_Insercao_H151 =0;
+    int N_Colisoes_H31;
+    int N_Colisoes_H79;
+    int N_Colisoes_H151;
     std::string strBuscar;
+
+
+
+
 
 
     /*
@@ -400,98 +410,100 @@ int main() {
      */
 
 
-    hash_table<std::string> H = hash_table<std::string>(151);
+    hash_table<std::string> H31 = hash_table<std::string>(31);
+    hash_table<std::string> H79 = hash_table<std::string>(79);
+    hash_table<std::string> H151 = hash_table<std::string>(151);
 
+    std::ofstream out("dados.txt");
 
-
-    for (int i =0 ; i<N_Strings; i++) {
-
-        std::string item = genString(1000);
-
-        if(i==k) {
-            strBuscar=item;
-        }
-
-
-
-        auto inicio = std::chrono::high_resolution_clock::now();
-        H.insert(item);
-        auto fim = std::chrono::high_resolution_clock::now();
-
-        auto duracao_nanosegundos = std::chrono::duration_cast<std::chrono::nanoseconds>(fim-inicio);
-        auto duracao_milissegundos = std::chrono::duration_cast<std::chrono::milliseconds>(fim-inicio);
-        auto duracao_segundos = std::chrono::duration_cast<std::chrono::seconds>(fim-inicio);
-
-        std::cout<<"-----------------------------------\n";
-        std::cout<<"INSERCAO NUMERO "<<i<<"\n";
-        std::cout<<"STRING INSERIDA = {' "<<item<<" '}\n";
-        std::cout<<"QUANTIDADE DE CHAR's = "<<item.size()<<"\n";
-        std::cout<<"Tempo de execucao para insercao: "<<duracao_nanosegundos.count()<<"ns\n";
-        std::cout<<"Tempo de execucao para insercao: "<<duracao_milissegundos.count()<<"ms\n";
-        std::cout<<"Tempo de execucao para insercao: "<<duracao_segundos.count()<<"seg\n";
-
-        M_Insercao_NS+=duracao_nanosegundos.count();
-        M_Insercao_MS+=duracao_milissegundos.count();
-        M_Insercao_SEG+=duracao_segundos.count();
-
+    if(!out.is_open()) {
+        std::cout<<"Erro ao abrir arquivo";
+        return -1;
     }
 
 
-    auto inicio_busca = std::chrono::high_resolution_clock::now();
-    H.search(strBuscar);
-    auto fim_busca = std::chrono::high_resolution_clock::now();
 
-    auto duracao_nanosegundos_busca = std::chrono::duration_cast<std::chrono::nanoseconds>(fim_busca-inicio_busca);
-    auto duracao_milissegundos_busca = std::chrono::duration_cast<std::chrono::milliseconds>(fim_busca-inicio_busca);
-    auto duracao_segundos_busca = std::chrono::duration_cast<std::chrono::seconds>(fim_busca-inicio_busca);
+    while(N_Strings<100000) {
+        for(int j = 0 ; j<10 ; j++) {
 
 
-    auto inicio_remocao = std::chrono::high_resolution_clock::now();
-    H.remove(strBuscar);
-    auto fim_remocao = std::chrono::high_resolution_clock::now();
+            k = rand()%N_Strings;
 
-    auto duracao_nanosegundos_remocao = std::chrono::duration_cast<std::chrono::nanoseconds>(fim_remocao-inicio_remocao);
-    auto duracao_milissegundos_remocao = std::chrono::duration_cast<std::chrono::milliseconds>(fim_remocao-inicio_remocao);
-    auto duracao_segundos_remocao = std::chrono::duration_cast<std::chrono::seconds>(fim_remocao-inicio_remocao);
+            for (int i =0 ; i<N_Strings; i++) {
 
-    std::cout<<"-----------------------------------\n\n";
-    std::cout<<"MEDIA DE TEMPO DE INSERCAO\n";
-    std::cout<<"Nanosegundos ="<<M_Insercao_NS/N_Strings<<"\n";
-    std::cout<<"Milissegundos ="<<M_Insercao_MS/N_Strings<<"\n";
-    std::cout<<"Segundos ="<<M_Insercao_SEG/N_Strings<<"\n";
-    std::cout<<"------------------------------------------\n";
-    std::cout<<"COLISOES POR LINHA DO VETOR DA TABELA HASH\n";
-    int T = H.getColissionPerLine();
-    std::cout<<"COLISOES TOTAIS ="<<T<<"\n";
-    std::cout<<"-----------------------------------\n";
-    std::cout<<"-----------------------------------\n";
-    std::cout<<"-----------------------------------\n";
-    std::cout<<"-----------------------------------\n";
+                std::string item = genString(1000);
 
-    std::cout<<"STRING A SER BUSCADA = {' "<<strBuscar<<" '}\n";
-    std::cout<<"QUANTIDADE DE CHAR's DA STRING ="<<strBuscar.size()<<"\n";
-    std::cout<<"TEMPO DE BUSCA\n";
-    std::cout<<"Nanossegundos="<<duracao_nanosegundos_busca.count()<<"\n";
-    std::cout<<"Milissegundos="<<duracao_milissegundos_busca.count()<<"\n";
-    std::cout<<"Segundos="<<duracao_segundos_busca.count()<<"\n";
+                auto inicio_insercao_H31 = std::chrono::high_resolution_clock::now();
+                H31.insert(item);
+                auto fim_insercao_H31 = std::chrono::high_resolution_clock::now();
 
-    std::cout<<"-----------------------------------\n";
-    std::cout<<"-----------------------------------\n";
-    std::cout<<"-----------------------------------\n";
-    std::cout<<"-----------------------------------\n";
+                auto inicio_insercao_H79 = std::chrono::high_resolution_clock::now();
+                H79.insert(item);
+                auto fim_insercao_H79 = std::chrono::high_resolution_clock::now();
 
-    std::cout<<"STRING A SER REMOVIDA = {' "<<strBuscar<<" '}\n";
-    std::cout<<"QUANTIDADE DE CHAR's DA STRING ="<<strBuscar.size()<<"\n";
-    std::cout<<"TEMPO DE BUSCA\n";
-    std::cout<<"Nanossegundos="<<duracao_nanosegundos_remocao.count()<<"\n";
-    std::cout<<"Milissegundos="<<duracao_milissegundos_remocao.count()<<"\n";
-    std::cout<<"Segundos="<<duracao_segundos_remocao.count()<<"\n";
+                auto inicio_insercao_H151 = std::chrono::high_resolution_clock::now();
+                H151.insert(item);
+                auto fim_insercao_H151 = std::chrono::high_resolution_clock::now();
+
+                auto duracao_nanosegundos_insercao_H31 = std::chrono::duration_cast<std::chrono::nanoseconds>(fim_insercao_H31-inicio_insercao_H31);
+                auto duracao_nanosegundos_insercao_H79 = std::chrono::duration_cast<std::chrono::nanoseconds>(fim_insercao_H79-inicio_insercao_H79);
+                auto duracao_nanosegundos_insercao_H151 = std::chrono::duration_cast<std::chrono::nanoseconds>(fim_insercao_H151-inicio_insercao_H151);
+
+                T_Insercao_H31+=duracao_nanosegundos_insercao_H31.count();
+                T_Insercao_H79+=duracao_nanosegundos_insercao_H79.count();
+                T_Insercao_H151+=duracao_nanosegundos_insercao_H151.count();
 
 
 
+                if(i==k) {
+                    strBuscar=item;
+                }
+
+
+            }
+
+            T_Insercao_H31/=N_Strings;
+            T_Insercao_H79/=N_Strings;
+            T_Insercao_H151/=N_Strings;
+
+
+            auto inicio_busca_H31 = std::chrono::high_resolution_clock::now();
+            H31.search(strBuscar);
+            auto fim_busca_H31 = std::chrono::high_resolution_clock::now();
+
+            auto inicio_busca_H79 = std::chrono::high_resolution_clock::now();
+            H31.search(strBuscar);
+            auto fim_busca_H79 = std::chrono::high_resolution_clock::now();
+
+            auto inicio_busca_H151 = std::chrono::high_resolution_clock::now();
+            H31.search(strBuscar);
+            auto fim_busca_H151 = std::chrono::high_resolution_clock::now();
 
 
 
+            auto duracao_nanosegundos_busca_H31 = std::chrono::duration_cast<std::chrono::nanoseconds>(fim_busca_H31-inicio_busca_H31);
+            auto duracao_nanosegundos_busca_H79 = std::chrono::duration_cast<std::chrono::nanoseconds>(fim_busca_H79-inicio_busca_H79);
+            auto duracao_nanosegundos_busca_H151 = std::chrono::duration_cast<std::chrono::nanoseconds>(fim_busca_H151-inicio_busca_H151);
 
+
+            N_Colisoes_H31 = H31.getColissionPerLine();
+            N_Colisoes_H79 = H79.getColissionPerLine();
+            N_Colisoes_H151= H151.getColissionPerLine();
+
+
+
+            out<<N_Strings<<"|31|"<<N_Colisoes_H31<<"|"<<duracao_nanosegundos_busca_H31.count()<<"|"<<T_Insercao_H31<<"\n";
+            out<<N_Strings<<"|79|"<<N_Colisoes_H79<<"|"<<duracao_nanosegundos_busca_H79.count()<<"|"<<T_Insercao_H79<<"\n";
+            out<<N_Strings<<"|151|"<<N_Colisoes_H151<<"|"<<duracao_nanosegundos_busca_H151.count()<<"|"<<T_Insercao_H151<<"\n";
+            H31.clear();
+            H79.clear();
+            H151.clear();
+
+
+        }
+
+        N_Strings*=10;
+
+    }
 
 }
